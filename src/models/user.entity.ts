@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-@Entity()
+@Entity({ orderBy: { id: "ASC" } })
 export class UserEntity{
     @PrimaryGeneratedColumn()
     id:number;
@@ -16,6 +16,6 @@ export class UserEntity{
     @Column({type: 'timestamp', default:()=>'CURRENT_TIMESTAMP'})
     createAt: Date;
 
-    @Column({type: 'timestamp', default:()=>'CURRENT_TIMESTAMP',onUpdate: "CURRENT_TIMESTAMP(6)"})
+    @Column({type: 'timestamp', default:()=>'CURRENT_TIMESTAMP'})
     updateAt: Date;
 }
