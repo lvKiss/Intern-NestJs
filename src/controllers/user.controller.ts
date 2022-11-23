@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
 import { User } from "src/interfaces/user.interface";
 import { UserService } from "src/services/user.service";
 import { DeleteResult, UpdateResult } from "typeorm";
@@ -9,7 +9,7 @@ export class UserController{
     constructor(private userService: UserService){}
     @Post()
     create(@Body() user: User): Promise<User>{
-        return this.userService.createUser(user)
+      return this.userService.createUser(user)
     }
 
     @Get()
@@ -28,7 +28,7 @@ export class UserController{
     }
 
     @Put(':id')
-    Update(@Param('id') param:number, @Body() user:User): Promise<UpdateResult>{
+    Update(@Param('id') param:number, @Body() user:User){
         return this.userService.update(param,user);
     }
 

@@ -11,20 +11,37 @@ export class UserService{
     ){}
 
     async createUser(user: User): Promise<User>{{
-        return await this.UserReponsitory.save(user);
+        try {
+            return await this.UserReponsitory.save(user);
+        } catch (error) {
+            return error
+        }
     }}
 
     async getUser(): Promise<User[]>{
-        return this.UserReponsitory.find();
+        try {
+            return await this.UserReponsitory.find();
+        } catch (error) {
+            return error
+        }
     }
 
     async getUserId(id : number): Promise<User>{
-        return this.UserReponsitory.findOneBy({id});
+        try {
+            return await this.UserReponsitory.findOneBy({id});
+        } catch (error) {
+            return error
+        }
     }
 
-    async update(id:number,user :User): Promise<UpdateResult>{
-        user.updateAt= new Date();
-        return await this.UserReponsitory.update(id,user)
+    async update(id:number,user :User){
+        try {
+            user.updateAt= new Date();
+            await this.UserReponsitory.update(id,user)
+            return this.getUserId(id);
+        } catch (error) {
+            return error
+        }
     }
 
     async updateMultiple(list: Array<User>) : Promise<UpdateResult>{
@@ -39,7 +56,11 @@ export class UserService{
     }
 
     async delete(id:number): Promise<DeleteResult>{
-        return await this.UserReponsitory.delete(id)
+        try {
+            return await this.UserReponsitory.delete(id)
+        } catch (error) {
+            return error
+        }
     }
     
     async deleteMultiple(id: Array<number>): Promise<DeleteResult>{
@@ -51,6 +72,4 @@ export class UserService{
             return error;
         }   
     }
-
-   
 }
