@@ -1,17 +1,24 @@
+import { Exclude } from "@nestjs/class-transformer";
+import { User } from "src/interfaces/user.interface";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 @Entity({ orderBy: { id: "ASC" } })
 export class UserEntity{
     @PrimaryGeneratedColumn()
+    
     id:number;
 
-    @Column({default:''})
+    @Column()
     lastname: string;
 
-    @Column({default:''})
+    @Column()
     fistname: string;
-
-    @Column({default:''})
+	
+    @Column()
     email: string
+
+    @Column({ select: false })
+    @Exclude({ toPlainOnly: true })
+    password: string
 
     @Column({type: 'timestamp', default:()=>'CURRENT_TIMESTAMP'})
     createAt: Date;

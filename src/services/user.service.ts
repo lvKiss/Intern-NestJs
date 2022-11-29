@@ -1,46 +1,52 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserEntity } from "src/models/user.entity";
 import { User } from "src/interfaces/user.interface";
-import {DeleteResult, Repository, UpdateResult} from 'typeorm';
+import { Repository, UpdateResult} from 'typeorm';
+import * as bcrypt from "bcrypt";
+import { isInt, isNumber } from "class-validator";
 @Injectable() 
 export class UserService{
     constructor (
-    @InjectRepository(UserEntity)
+    @InjectRepository(UserEntity)//mid
     private readonly UserReponsitory: Repository<UserEntity>
     ){}
 
     async createUser(user: User): Promise<User>{{
         try {
+            user.password = await bcrypt.hash(user.password, 10);
             return await this.UserReponsitory.save(user);
         } catch (error) {
             return error
         }
     }}
-
+    
     async getUser(): Promise<User[]>{
-        try {
-            return await this.UserReponsitory.find();
-        } catch (error) {
-            return error
-        }
-    }
+        const users = await this.UserReponsitory.find()
+        if(users.length!=0){
+            return await this.UserReponsitory.find();   
+        }else{
+            throw new HttpException('Users not found', HttpStatus.NOT_FOUND);
+        } 
+    } 
 
-    async getUserId(id : number): Promise<User>{
-        try {
-            return await this.UserReponsitory.findOneBy({id});
-        } catch (error) {
-            return error
-        }
+
+    async getUserId(id : number){
+        const user = await this.UserReponsitory.findOneBy({id})
+        if(user == null){
+            throw new HttpException('User not found '+ id, HttpStatus.NOT_FOUND);
+        }else{
+            return  user 
+        }   
     }
 
     async update(id:number,user :User){
-        try {
-            user.updateAt= new Date();
-            await this.UserReponsitory.update(id,user)
-            return this.getUserId(id);
-        } catch (error) {
-            return error
+        const upd= await this.UserReponsitory.update(id,user)
+        user.updateAt= new Date()
+        if(upd.affected){
+            throw new HttpException('User updated '+ id, HttpStatus.ACCEPTED);
+        }else{
+            throw new HttpException('User not found '+ id, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -55,21 +61,32 @@ export class UserService{
         } 
     }
 
-    async delete(id:number): Promise<DeleteResult>{
-        try {
-            return await this.UserReponsitory.delete(id)
-        } catch (error) {
-            return error
-        }
-    }
-    
-    async deleteMultiple(id: Array<number>): Promise<DeleteResult>{
-        try {
-            for(var item of id){
-                await this.delete(item)
+    async delete(id:number){
+        const del= await this.UserReponsitory.delete(id)
+            if(del.affected){
+                throw new HttpException('User deleted '+id, HttpStatus.ACCEPTED);
+            }else{
+                throw new HttpException('User not found '+ id, HttpStatus.NOT_FOUND);
             }
-        } catch (error) {
-            return error;
-        }   
+    }
+        
+        
+
+    
+    async deleteMultiple(id: Array<number>){
+        const list = []
+        for(let item of id){
+            if(isInt(item)){
+                const user= await this.UserReponsitory.delete(item)
+                if(user.affected){
+                    list.push(new HttpException('User deleted ' + item, HttpStatus.OK));
+                }   
+            }
+        }
+        if(list.length!=0){
+                return [{count:list.length}, list]
+        }else{
+            throw new HttpException('List Users not found ', HttpStatus.NOT_FOUND);  
+        }
     }
 }

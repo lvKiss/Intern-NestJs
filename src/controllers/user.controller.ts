@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Res, UseInterceptors } from "@nestjs/common";
 import { User } from "src/interfaces/user.interface";
 import { UserService } from "src/services/user.service";
-import { DeleteResult, UpdateResult } from "typeorm";
+
 
 
 @Controller('user')
@@ -11,15 +11,18 @@ export class UserController{
     create(@Body() user: User): Promise<User>{
       return this.userService.createUser(user)
     }
-
+    
+    @UseInterceptors(ClassSerializerInterceptor)
     @Get()
-    get(){
+    get() : Promise<User[]>{
         return this.userService.getUser()
     }
 
     @Get(':id')
-    getId(@Param('id') param:number):Promise<User>{
-        return this.userService.getUserId(param);
+    async getId(@Param('id',ParseIntPipe) id:number){
+        
+        return this.userService.getUserId(id);
+
     }
 
     @Put('update')
@@ -28,17 +31,17 @@ export class UserController{
     }
 
     @Put(':id')
-    Update(@Param('id') param:number, @Body() user:User){
-        return this.userService.update(param,user);
+    async Update(@Param('id',ParseIntPipe) id:number, @Body() user:User){
+       return await this.userService.update(id,user)   
     }
 
     @Delete('delete')   
-    DeleteMany(@Body() request :Array<number>):Promise<DeleteResult>{
+    DeleteMany(@Body() request :Array<number>){
         return this.userService.deleteMultiple(request)
     }
 
     @Delete(':id')
-    Delete(@Param('id') param: number):Promise<DeleteResult>{
-        return this.userService.delete(param)
+    async Delete(@Param('id',ParseIntPipe) param: number){
+        return await this.userService.delete(param)
     }
 }
