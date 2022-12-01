@@ -1,10 +1,13 @@
-import { Body, ClassSerializerInterceptor, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Res, UseInterceptors } from "@nestjs/common";
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Res, UseGuards, UseInterceptors } from "@nestjs/common";
+import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
 import { User } from "src/interfaces/user.interface";
 import { UserService } from "src/services/user.service";
 
 
 
 @Controller('user')
+@UseGuards(JwtAuthGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 export class UserController{
     constructor(private userService: UserService){}
     @Post()
@@ -12,7 +15,7 @@ export class UserController{
       return this.userService.createUser(user)
     }
     
-    @UseInterceptors(ClassSerializerInterceptor)
+   
     @Get()
     get() : Promise<User[]>{
         return this.userService.getUser()
@@ -24,7 +27,7 @@ export class UserController{
         return this.userService.getUserId(id);
 
     }
-
+    @UseGuards(JwtAuthGuard)
     @Put('update')
     UpdateMany(@Body() request:Array<User>){
         return this.userService.updateMultiple(request);

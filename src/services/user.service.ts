@@ -5,6 +5,7 @@ import { User } from "src/interfaces/user.interface";
 import { Repository, UpdateResult} from 'typeorm';
 import * as bcrypt from "bcrypt";
 import { isInt, isNumber } from "class-validator";
+import { use } from "passport";
 @Injectable() 
 export class UserService{
     constructor (
@@ -13,11 +14,13 @@ export class UserService{
     ){}
 
     async createUser(user: User): Promise<User>{{
-        try {
-            user.password = await bcrypt.hash(user.password, 10);
-            return await this.UserReponsitory.save(user);
-        } catch (error) {
-            return error
+        const check= await this.UserReponsitory.findOne({where:{ username: user.username}})
+        user.password = await bcrypt.hash(user.password, 10);
+        if(check!=null){
+            throw new HttpException('Username is exist ', HttpStatus.BAD_REQUEST)
+        }else{
+            await this.UserReponsitory.save(user);
+            throw new HttpException('User created', HttpStatus.OK)
         }
     }}
     
@@ -84,9 +87,19 @@ export class UserService{
             }
         }
         if(list.length!=0){
-                return [{count:list.length}, list]
+            return [{count:list.length}, list]
         }else{
             throw new HttpException('List Users not found ', HttpStatus.NOT_FOUND);  
+
         }
     }
+
+    async findOneUser(username: string){
+        const user = await this.UserReponsitory.findOneBy({username})
+        if(user == null){
+            throw new HttpException('User not found ', HttpStatus.NOT_FOUND);
+        }else{
+            return  user 
+        }   
+      }
 }

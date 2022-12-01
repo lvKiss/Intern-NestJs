@@ -1,6 +1,10 @@
-import {  IsAlpha, IsEmail, IsNotEmpty, IsOptional} from "class-validator";
+import {  IsAlpha, IsEmail, IsOptional} from "class-validator";
 export class User{
     id :number;
+
+    @IsOptional()	
+    @IsAlpha()	
+    username?: string;
     
     @IsOptional()	
     @IsAlpha()	
