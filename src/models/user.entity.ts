@@ -1,4 +1,5 @@
 import { Exclude } from "class-transformer";
+import Role from "src/role/role.enum";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 @Entity({ orderBy: { id: "ASC" } })
 export class UserEntity{
@@ -21,6 +22,13 @@ export class UserEntity{
     @Column()
     @Exclude({ toPlainOnly: true })
     password: string
+
+    @Column({
+        type: 'enum',
+        enum: Role,
+        default: Role.User
+      })
+    role: Role
 
     @Column({type: 'timestamp', default:()=>'CURRENT_TIMESTAMP'})
     createAt: Date;

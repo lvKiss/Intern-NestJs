@@ -5,7 +5,6 @@ import { User } from "src/interfaces/user.interface";
 import { Repository, UpdateResult} from 'typeorm';
 import * as bcrypt from "bcrypt";
 import { isInt, isNumber } from "class-validator";
-import { use } from "passport";
 @Injectable() 
 export class UserService{
     constructor (
@@ -19,8 +18,12 @@ export class UserService{
         if(check!=null){
             throw new HttpException('Username is exist ', HttpStatus.BAD_REQUEST)
         }else{
-            await this.UserReponsitory.save(user);
-            throw new HttpException('User created', HttpStatus.OK)
+            if(user.role === "Admin"|| user.role === "User"|| !user.role){
+                await this.UserReponsitory.save(user);
+                throw new HttpException('User created', HttpStatus.OK)
+            }else{
+                throw new HttpException('Role not right', HttpStatus.BAD_REQUEST)
+            }
         }
     }}
     

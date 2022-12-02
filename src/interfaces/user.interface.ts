@@ -1,4 +1,5 @@
 import {  IsAlpha, IsEmail, IsOptional} from "class-validator";
+import Role from "src/role/role.enum";
 export class User{
     id :number;
 
@@ -19,6 +20,9 @@ export class User{
     email?: string;
 
     password?: string;	
+
+    @IsOptional()	
+    role?: Role;
 
     createAt: Date;
 
